@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">ActSpam</string>
+    <string name="edit_text_hint" translatable="false">Please enter your movie review.</string>
+    <string name="button_ok" translatable="false">Predict</string>
+    <string name="snack_bar_text" translatable="false">Undo Message Delete</string>
+    <string name="snack_bar_undo" translatable="false">Undo</string>
+    <string name="phonestate_permission_denied">Permission to read phone state denied. Open app info and give app to read the permission</string>
+    <string name="phonestate_access_required">Permission to read phone required to identify the device</string>
+    <string name="give_permission">Approve</string>
+    <string name="read_sms_permission_denied">Permission to read messages from denied. Open app info and give app to read the permission</string>
+    <string name="readsms_access_required">Permission to read sms required to identify spam messages</string>
+
+</resources>
