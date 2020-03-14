@@ -13,9 +13,6 @@ import com.google.gson.annotations.SerializedName;
 public class DeviceInfo {
 
     public class Device {
-
-        // added serialization to support json data
-
         @SerializedName("imei")
         private String imei;
         @SerializedName("imsi")
