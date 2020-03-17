@@ -8,4 +8,5 @@ public class AppConstants {
     public static final String MessageBodyCol = "messagebody";
     public static final String DatetimeCol = "date";
     public static final String LabelCol = "label";
+    public static final String SentByCol = "sentby";
 }
