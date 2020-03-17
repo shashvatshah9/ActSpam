@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,10 +30,15 @@ import com.actspam.utility.SmsReceiver;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.List;
+import java.util.Map;
 
 public class HomeActivity extends AppCompatActivity {
+
     final private int PERMISSION_REQUEST_CODE = 0;
     final String[] permissions = new String[]{Manifest.permission.READ_PHONE_STATE, Manifest.permission.READ_SMS};
+
+    public static final String DevicePreferences = "DEVICE_INFO";
+    public static final String MessagePreferences = "MESSAGES";
 
     private ClassifyText classifyText;
     private Handler handler;
@@ -72,24 +79,51 @@ public class HomeActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Check the required permissions on the device
+     */
     private void checkPermissions() {
+        // required permissions are not present
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED ||
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, permissions, PERMISSION_REQUEST_CODE);
         }
         else{
+            // permissions are granted to the application
+            // setUpDevice() and fetch the sms from device
             setUpDevice();
         }
     }
 
+    /**
+     * Fetch the device infomation and load the sms from ContextProvider or local database
+     */
     private void setUpDevice(){
-        deviceInfo = new DeviceInfo(this);
-        Log.i("device info", deviceInfo.toString());
-        // TODO : SEND DEVICE INFO TO SERVER
-        // TODO : SAVE DEVICE INFO IN LOCALLY
-        fetchSms = new SmsFetchFromDevice(this);
-        smsList = fetchSms.getSMS();
-        // TODO : SAVE EACH MESSAGE IN LOCAL DATABASE
+        // check shared preferences if device info is present or not
+        SharedPreferences devicePreferences = getSharedPreferences(DevicePreferences, Context.MODE_PRIVATE);
+        if(devicePreferences.getAll().size() == 0){
+            deviceInfo = new DeviceInfo(this);
+            Log.i("device info", deviceInfo.toString());
+            // TODO : SEND DEVICE INFO TO SERVER
+            // TODO : SAVE DEVICE INFO IN LOCALLY
+        }
+        else{
+            Map<String, String> devicePrefencesMap = (Map<String, String>) devicePreferences.getAll();
+            deviceInfo = new DeviceInfo(this, devicePrefencesMap);
+        }
+
+        SharedPreferences messagePreferences = getSharedPreferences(MessagePreferences, Context.MODE_PRIVATE);
+        boolean isMessageDbSet = messagePreferences.getBoolean("DB_SET", false);
+        if(isMessageDbSet){
+            // fetch the messages from the local database
+            // TODO : SAVE EACH MESSAGE IN LOCAL DATABASE
+
+        }
+        else{
+            // fetch the message from the device and put it to local database
+            fetchSms = new SmsFetchFromDevice(this);
+            smsList = fetchSms.getSMS();
+        }
     }
 
 
