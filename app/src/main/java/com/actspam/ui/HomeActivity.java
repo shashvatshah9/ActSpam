@@ -25,6 +25,7 @@ import com.actspam.models.DeviceInfo;
 import com.actspam.models.DeviceMessage;
 import com.actspam.ui.adapter.MessageAdapter;
 import com.actspam.ui.adapter.SwipeToDeleteCallback;
+import com.actspam.utility.DatabaseHelper;
 import com.actspam.utility.SmsFetchFromDevice;
 import com.actspam.utility.SmsReceiver;
 import com.google.android.material.snackbar.Snackbar;
@@ -42,11 +43,13 @@ public class HomeActivity extends AppCompatActivity {
 
     private ClassifyText classifyText;
     private Handler handler;
-    private TextView textView;
     private DeviceInfo deviceInfo;
     private SmsFetchFromDevice fetchSms;
     private SmsReceiver smsReceiver;
     private List<DeviceMessage> smsList;
+    private DatabaseHelper db;
+
+    private TextView textView;
     private View mLayout;
     private RecyclerView recyclerView;
     private MessageAdapter messageAdapter;
@@ -101,14 +104,15 @@ public class HomeActivity extends AppCompatActivity {
     private void setUpDevice(){
         // check shared preferences if device info is present or not
         SharedPreferences devicePreferences = getSharedPreferences(DevicePreferences, Context.MODE_PRIVATE);
+        db = new DatabaseHelper(this);
+
         if(devicePreferences.getAll().size() == 0){
             deviceInfo = new DeviceInfo(this);
             Log.i("device info", deviceInfo.toString());
             // TODO : SEND DEVICE INFO TO SERVER
             // TODO : SAVE DEVICE INFO IN LOCALLY
         }
-        else{
-            Map<String, String> devicePrefencesMap = (Map<String, String>) devicePreferences.getAll();
+             Map<String, String> devicePrefencesMap = (Map<String, String>) devicePreferences.getAll();
             deviceInfo = new DeviceInfo(this, devicePrefencesMap);
         }
 
@@ -116,13 +120,13 @@ public class HomeActivity extends AppCompatActivity {
         boolean isMessageDbSet = messagePreferences.getBoolean("DB_SET", false);
         if(isMessageDbSet){
             // fetch the messages from the local database
-            // TODO : SAVE EACH MESSAGE IN LOCAL DATABASE
-
+            smsList.addAll(db.getMessages());
         }
         else{
             // fetch the message from the device and put it to local database
             fetchSms = new SmsFetchFromDevice(this);
             smsList = fetchSms.getSMS();
+            db.insertMessages(smsList);
         }
     }
 
