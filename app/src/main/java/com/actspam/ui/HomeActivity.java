@@ -112,7 +112,8 @@ public class HomeActivity extends AppCompatActivity {
             // TODO : SEND DEVICE INFO TO SERVER
             // TODO : SAVE DEVICE INFO IN LOCALLY
         }
-             Map<String, String> devicePrefencesMap = (Map<String, String>) devicePreferences.getAll();
+        else{
+            Map<String, String> devicePrefencesMap = (Map<String, String>) devicePreferences.getAll();
             deviceInfo = new DeviceInfo(this, devicePrefencesMap);
         }
 
