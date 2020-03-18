@@ -43,13 +43,39 @@
         android:id="@+id/sender_text"
         android:layout_width="match_parent"
         android:layout_height="35dp"
-        android:layout_marginLeft="65dp"
+        android:layout_marginLeft="80dp"
         android:layout_marginTop="45dp"
-        android:layout_marginRight="10dp"
+        android:layout_marginRight="40dp"
         android:layout_marginBottom="3dp"
-        android:maxLines="2"
+        android:maxLines="1"
         android:ellipsize="end"
         android:singleLine="false"
         android:text=""
         android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/spam_symbol"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginTop="45dp"
+        android:layout_toRightOf="@id/sender_text"
+        android:background="@drawable/rounded_text_small"
+        android:backgroundTint="@color/colorAccent"
+        android:gravity="center"
+        android:textColor="@android:color/white"
+        android:textSize="5dp"
+        android:layout_marginLeft="-70dp"/>
+
+    <TextView
+        android:id="@+id/unread_count"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginTop="45dp"
+        android:layout_toRightOf="@id/spam_symbol"
+        android:background="@drawable/rounded_text_small"
+        android:backgroundTint="@color/colorPrimary"
+        android:gravity="center"
+        android:textColor="@android:color/white"
+        android:textSize="5dp"
+        android:layout_marginLeft="15dp"/>
 </RelativeLayout>

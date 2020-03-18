@@ -8,11 +8,20 @@
     tools:context=".ui.HomeActivity"
     tools:showIn="@layout/activity_home">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/message_recycler_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scrollbars="vertical" />
+    <ScrollView
+        android:id="@+id/home_activity_scrollbar"
+        style="@android:style/Widget.Holo.Light.ScrollView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:scrollbarStyle="outsideOverlay"
+        android:scrollbarThumbVertical="@drawable/scroll_selector"
+        android:scrollbarSize="10dp">
 
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/message_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical" />
 
+    </ScrollView>
 </RelativeLayout>
