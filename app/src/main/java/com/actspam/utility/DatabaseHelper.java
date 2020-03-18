@@ -6,11 +6,13 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.AsyncTask;
+import android.text.TextUtils;
 
 import com.actspam.models.DeviceMessage;
 import com.actspam.models.Message;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -54,6 +56,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return list;
     }
 
+    public int deleteMessages(List<Integer> messageIds){
+        SQLiteDatabase db = this.getWritableDatabase();
+        String ids[] = new String[messageIds.size()];
+        int x=0;
+        for(int i : messageIds){
+            ids[x++] = Integer.toString(i);
+        }
+        String whereClause = String.format(AppConstants.IdCol + " in (%s)", TextUtils.join(",", Collections.nCopies(ids.length, "?")));
+
+        return db.delete(AppConstants.MessageTableName, whereClause, ids);
+    }
+
     private class SetMessageTask extends AsyncTask<List<DeviceMessage>, Void, Void>{
         SQLiteDatabase db = null;
 
@@ -91,7 +105,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     private class GetMessageTask extends AsyncTask<Cursor, Void, List<DeviceMessage>>{
-
         @Override
         protected List<DeviceMessage> doInBackground(Cursor... cursors) {
             List<DeviceMessage> listMessage = new ArrayList<>();

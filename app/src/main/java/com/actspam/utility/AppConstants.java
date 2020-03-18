@@ -9,4 +9,5 @@ public class AppConstants {
     public static final String DatetimeCol = "date";
     public static final String LabelCol = "label";
     public static final String SentByCol = "sentby";
+    public static final String NOTIFICATION_CHANNEL_ID = "101";
 }

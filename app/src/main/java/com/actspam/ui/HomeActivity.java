@@ -10,9 +10,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -25,6 +31,7 @@ import com.actspam.models.DeviceInfo;
 import com.actspam.models.DeviceMessage;
 import com.actspam.ui.adapter.MessageAdapter;
 import com.actspam.ui.adapter.SwipeToDeleteCallback;
+import com.actspam.utility.AppConstants;
 import com.actspam.utility.DatabaseHelper;
 import com.actspam.utility.SmsFetchFromDevice;
 import com.actspam.utility.SmsReceiver;
@@ -35,7 +42,7 @@ import java.util.Map;
 
 public class HomeActivity extends AppCompatActivity {
 
-    final private int PERMISSION_REQUEST_CODE = 0;
+    private final int PERMISSION_REQUEST_CODE = 0;
     final String[] permissions = new String[]{Manifest.permission.READ_PHONE_STATE, Manifest.permission.READ_SMS};
 
     public static final String DevicePreferences = "DEVICE_INFO";
@@ -59,6 +66,7 @@ public class HomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+        createNotificationChannel();
         Log.i("Demo", "OnCreate");
         mLayout = findViewById(R.id.main_activity_relative_layout);
         recyclerView = findViewById(R.id.message_recycler_view);
@@ -79,7 +87,14 @@ public class HomeActivity extends AppCompatActivity {
 //            String smsBody = sms.getSentBy() + " " + sms.getMessageBody();
 //            AsyncTask.execute(()-> handler.post(()->callWorker(smsBody)));
 //        }
-
+        BroadcastReceiver br = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                messageAdapter.notifyDataSetChanged();
+            }
+        };
+        IntentFilter filter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
+        this.registerReceiver(br, filter);
     }
 
     /**
@@ -139,6 +154,23 @@ public class HomeActivity extends AppCompatActivity {
         ItemTouchHelper itemTouchHelper = new
                 ItemTouchHelper(new SwipeToDeleteCallback(getApplicationContext(), messageAdapter));
         itemTouchHelper.attachToRecyclerView(recyclerView);
+    }
+
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.channel_name);
+            String description = getString(R.string.channel_description);
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(AppConstants.NOTIFICATION_CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            channel.setImportance(NotificationManager.IMPORTANCE_HIGH);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 
     @WorkerThread
