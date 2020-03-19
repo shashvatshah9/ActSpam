@@ -1,10 +1,6 @@
 package com.actspam.utility;
 
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -16,7 +12,6 @@ import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-
 
 import com.actspam.R;
 import com.actspam.ui.HomeActivity;
@@ -33,6 +28,7 @@ public class SmsReceiver extends BroadcastReceiver {
         if(intent.getAction().equals("android.provider.Telephony.SMS_RECEIVED")){
             Bundle bundle = intent.getExtras();
             List<SmsMessage> smsMessageList;
+
             if(bundle!=null){
                 try{
                     Object[] pdus = (Object[]) bundle.get("pdus");

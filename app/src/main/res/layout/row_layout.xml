@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="80dp" android:padding="2dp"
+    android:layout_width="match_parent" android:layout_height="75dp" android:padding="2dp"
     android:foregroundTint="@color/colorAccent">
     <TextView
         android:id="@+id/round_name_icon"
@@ -23,6 +23,7 @@
         android:layout_marginTop="15dp"
         android:layout_marginRight="120dp"
         android:width="1sp"
+        android:fontFamily="@font/amaranth"
         android:text="Hello"
         android:textColor="@color/title"
         android:textSize="18sp"
@@ -47,11 +48,12 @@
         android:layout_marginTop="45dp"
         android:layout_marginRight="80dp"
         android:layout_marginBottom="3dp"
-        android:maxLines="1"
         android:ellipsize="end"
+        android:fontFamily="@font/amaranth"
+        android:maxLines="1"
         android:singleLine="false"
-        android:text=""
-        android:textSize="12sp" />
+        android:text="this is a message"
+        android:textSize="14sp" />
 
     <TextView
         android:id="@+id/spam_symbol"

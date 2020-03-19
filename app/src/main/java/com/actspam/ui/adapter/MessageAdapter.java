@@ -1,6 +1,7 @@
 package com.actspam.ui.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
@@ -22,6 +23,7 @@ import com.actspam.R;
 import com.actspam.models.DeviceMessage;
 import com.actspam.models.Message;
 import com.actspam.ui.HomeActivity;
+import com.actspam.ui.MessageViewActivity;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -175,6 +177,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 //                else{
 //                    // TODO : OPEN THE THREAD VIEW ACTIVITY
 //                }
+                Intent openActivity = new Intent(context, MessageViewActivity.class);
+//                openActivity.putExtra("key", value); //Optional parameters
+                mainActivity.startActivity(openActivity);
             });
         }
 
