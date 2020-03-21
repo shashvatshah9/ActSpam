@@ -23,6 +23,7 @@ import com.actspam.R;
 import com.actspam.models.DeviceMessage;
 import com.actspam.models.Message;
 import com.actspam.ui.HomeActivity;
+import com.actspam.ui.MessagePreviewer;
 import com.actspam.ui.MessageViewActivity;
 
 import java.text.DateFormat;
@@ -123,6 +124,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         holder.senderNameView.setText(message.getSentBy());
         holder.senderTextView.setText(message.getMessageBody().trim());
         holder.roundNameTextView.setText(message.getSentBy().substring(0,2));
+        if(deviceMessage.isHasRead()){
+            holder.unreadCount.setVisibility(View.GONE);
+        }
+        else holder.unreadCount.setVisibility(View.VISIBLE);
+        if(message.getLabel().equals("SPAM")){
+            holder.spamSymbol.setVisibility(View.VISIBLE);
+        }
+        else holder.spamSymbol.setVisibility(View.GONE);
         holder.update(position);
     }
 
@@ -134,7 +143,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
-        public TextView dateView, senderTextView, senderNameView, roundNameTextView;
+        public TextView dateView, senderTextView, senderNameView, roundNameTextView, spamSymbol, unreadCount;
         public View view;
 
         public ViewHolder(View v){
@@ -144,6 +153,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             senderTextView = v.findViewById(R.id.sender_text);
             senderNameView = v.findViewById(R.id.sender_name);
             roundNameTextView = v.findViewById(R.id.round_name_icon);
+            spamSymbol = v.findViewById(R.id.spam_symbol);
+            unreadCount = v.findViewById(R.id.unread_count);
         }
 
         void selectItem(final int position) {
@@ -177,9 +188,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 //                else{
 //                    // TODO : OPEN THE THREAD VIEW ACTIVITY
 //                }
-                Intent openActivity = new Intent(context, MessageViewActivity.class);
+//                Intent openActivity = new Intent(context, MessageViewActivity.class);
 //                openActivity.putExtra("key", value); //Optional parameters
-                mainActivity.startActivity(openActivity);
+//                mainActivity.startActivity(openActivity);
+                new MessagePreviewer().show(view1.getContext(), view, senderTextView.getText().toString());
             });
         }
 
