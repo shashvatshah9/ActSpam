@@ -1,5 +1,7 @@
 package com.actspam.models;
 
+import com.actspam.utility.AppConstants;
+
 /**
  * Stores info about the message on the device
  * A message can belong to a conversation thread or a single message
@@ -13,6 +15,17 @@ public class DeviceMessage {
     private Long id;
 
     private boolean hasRead;
+
+    public static final String CREATE_TABLE =
+            "CREATE TABLE " + AppConstants.MessageTableName + "("
+                    + AppConstants.IdCol + " INTEGER PRIMARY KEY,"
+                    + AppConstants.ThreadIdCol + " INTEGER,"
+                    + AppConstants.DatetimeCol + " TEXT,"
+                    + AppConstants.HasReadCol + " INTEGER,"
+                    + AppConstants.SentByCol + " TEXT,"
+                    + AppConstants.MessageBodyCol + " TEXT,"
+                    + AppConstants.LabelCol + " TEXT"
+                    + ")";
 
     public boolean isHasRead() {
         return hasRead;
