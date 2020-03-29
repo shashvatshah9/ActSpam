@@ -15,6 +15,16 @@ public class Message {
     private Date date;
     @SerializedName("device_id")
     private String deviceId;
+    @SerializedName("label")
+    private String label;
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
 
     public String getSentBy() {
         return sentBy;

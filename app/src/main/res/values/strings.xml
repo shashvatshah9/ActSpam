@@ -9,5 +9,6 @@
     <string name="give_permission">Approve</string>
     <string name="read_sms_permission_denied">Permission to read messages from denied. Open app info and give app to read the permission</string>
     <string name="readsms_access_required">Permission to read sms required to identify spam messages</string>
-
+    <string name="channel_name">Messages</string>
+    <string name="channel_description">Notifies when a new SMS is received</string>
 </resources>

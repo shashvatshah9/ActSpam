@@ -10,7 +10,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -23,23 +31,32 @@ import com.actspam.models.DeviceInfo;
 import com.actspam.models.DeviceMessage;
 import com.actspam.ui.adapter.MessageAdapter;
 import com.actspam.ui.adapter.SwipeToDeleteCallback;
+import com.actspam.utility.AppConstants;
+import com.actspam.utility.DatabaseHelper;
 import com.actspam.utility.SmsFetchFromDevice;
 import com.actspam.utility.SmsReceiver;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.List;
+import java.util.Map;
 
 public class HomeActivity extends AppCompatActivity {
-    final private int PERMISSION_REQUEST_CODE = 0;
+
+    private final int PERMISSION_REQUEST_CODE = 0;
     final String[] permissions = new String[]{Manifest.permission.READ_PHONE_STATE, Manifest.permission.READ_SMS};
+
+    public static final String DevicePreferences = "DEVICE_INFO";
+    public static final String MessagePreferences = "MESSAGES";
 
     private ClassifyText classifyText;
     private Handler handler;
-    private TextView textView;
     private DeviceInfo deviceInfo;
     private SmsFetchFromDevice fetchSms;
     private SmsReceiver smsReceiver;
     private List<DeviceMessage> smsList;
+    private DatabaseHelper db;
+
+    private TextView textView;
     private View mLayout;
     private RecyclerView recyclerView;
     private MessageAdapter messageAdapter;
@@ -49,6 +66,7 @@ public class HomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+        createNotificationChannel();
         Log.i("Demo", "OnCreate");
         mLayout = findViewById(R.id.main_activity_relative_layout);
         recyclerView = findViewById(R.id.message_recycler_view);
@@ -69,27 +87,63 @@ public class HomeActivity extends AppCompatActivity {
 //            String smsBody = sms.getSentBy() + " " + sms.getMessageBody();
 //            AsyncTask.execute(()-> handler.post(()->callWorker(smsBody)));
 //        }
-
+        BroadcastReceiver br = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                messageAdapter.notifyDataSetChanged();
+            }
+        };
+        IntentFilter filter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
+        this.registerReceiver(br, filter);
     }
 
+    /**
+     * Check the required permissions on the device
+     */
     private void checkPermissions() {
+        // required permissions are not present
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED ||
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, permissions, PERMISSION_REQUEST_CODE);
         }
         else{
+            // permissions are granted to the application
+            // setUpDevice() and fetch the sms from device
             setUpDevice();
         }
     }
 
+    /**
+     * Fetch the device infomation and load the sms from ContextProvider or local database
+     */
     private void setUpDevice(){
-        deviceInfo = new DeviceInfo(this);
-        Log.i("device info", deviceInfo.toString());
-        // TODO : SEND DEVICE INFO TO SERVER
-        // TODO : SAVE DEVICE INFO IN LOCALLY
-        fetchSms = new SmsFetchFromDevice(this);
-        smsList = fetchSms.getSMS();
-        // TODO : SAVE EACH MESSAGE IN LOCAL DATABASE
+        // check shared preferences if device info is present or not
+        SharedPreferences devicePreferences = getSharedPreferences(DevicePreferences, Context.MODE_PRIVATE);
+        db = new DatabaseHelper(this);
+
+        if(devicePreferences.getAll().size() == 0){
+            deviceInfo = new DeviceInfo(this);
+            Log.i("device info", deviceInfo.toString());
+            // TODO : SEND DEVICE INFO TO SERVER
+            // TODO : SAVE DEVICE INFO IN LOCALLY
+        }
+        else{
+            Map<String, String> devicePrefencesMap = (Map<String, String>) devicePreferences.getAll();
+            deviceInfo = new DeviceInfo(this, devicePrefencesMap);
+        }
+
+        SharedPreferences messagePreferences = getSharedPreferences(MessagePreferences, Context.MODE_PRIVATE);
+        boolean isMessageDbSet = messagePreferences.getBoolean("DB_SET", false);
+        if(isMessageDbSet){
+            // fetch the messages from the local database
+            smsList.addAll(db.getMessages());
+        }
+        else{
+            // fetch the message from the device and put it to local database
+            fetchSms = new SmsFetchFromDevice(this);
+            smsList = fetchSms.getSMS();
+            db.insertMessages(smsList);
+        }
     }
 
 
@@ -100,6 +154,23 @@ public class HomeActivity extends AppCompatActivity {
         ItemTouchHelper itemTouchHelper = new
                 ItemTouchHelper(new SwipeToDeleteCallback(getApplicationContext(), messageAdapter));
         itemTouchHelper.attachToRecyclerView(recyclerView);
+    }
+
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.channel_name);
+            String description = getString(R.string.channel_description);
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(AppConstants.NOTIFICATION_CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            channel.setImportance(NotificationManager.IMPORTANCE_HIGH);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 
     @WorkerThread
