@@ -179,8 +179,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
                 view.setBackgroundColor(Color.WHITE);
             }
             view.setOnLongClickListener((View view1)->{
-                ((AppCompatActivity)view1.getContext()).startSupportActionMode(actionModeCallback);
-                selectItem(position);
+//                ((AppCompatActivity)view1.getContext()).startSupportActionMode(actionModeCallback);
+//                selectItem(position);
+                new MessagePreviewer().show(view1.getContext(), view, senderTextView.getText().toString());
+
                 return true;
             });
             view.setOnClickListener((View view1)->{
