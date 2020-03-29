@@ -161,7 +161,6 @@ public class DeviceInfo {
             d.setImsi(teleManager.getSubscriberId());
             d.setNumber(teleManager.getLine1Number());
         }
-
         d.setNetworkOp(teleManager.getNetworkOperator());
         d.setModel(Build.MODEL);
         d.setProduct(Build.PRODUCT);

@@ -186,7 +186,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 //                if(multiSelect) {
 //                }
 //                else{
-//                    // TODO : OPEN THE THREAD VIEW ACTIVITY
+//                     TODO : OPEN THE THREAD VIEW ACTIVITY
 //                }
 //                Intent openActivity = new Intent(context, MessageViewActivity.class);
 //                openActivity.putExtra("key", value); //Optional parameters

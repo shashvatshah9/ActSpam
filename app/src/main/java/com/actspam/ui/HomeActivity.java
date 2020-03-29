@@ -21,6 +21,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.telephony.SmsMessage;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -31,12 +32,14 @@ import com.actspam.models.DeviceInfo;
 import com.actspam.models.DeviceMessage;
 import com.actspam.ui.adapter.MessageAdapter;
 import com.actspam.ui.adapter.SwipeToDeleteCallback;
+import com.actspam.ui.notification.MessageNotificationBuilder;
 import com.actspam.utility.AppConstants;
 import com.actspam.utility.DatabaseHelper;
 import com.actspam.utility.SmsFetchFromDevice;
 import com.actspam.utility.SmsReceiver;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -78,7 +81,7 @@ public class HomeActivity extends AppCompatActivity {
 
         //        smsReceiver = new SmsReceiver();
 
-        Log.i("SMS","sms loaded");
+        Log.i("SMS", "sms loaded");
         messageAdapter = new MessageAdapter(getApplicationContext(), smsList, this);
 
         setUpRecyclerView();
@@ -87,14 +90,44 @@ public class HomeActivity extends AppCompatActivity {
 //            String smsBody = sms.getSentBy() + " " + sms.getMessageBody();
 //            AsyncTask.execute(()-> handler.post(()->callWorker(smsBody)));
 //        }
-        BroadcastReceiver br = new BroadcastReceiver() {
+        BroadcastReceiver messageReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                Bundle bundle = intent.getExtras();
+                List<SmsMessage> smsMessageList;
+
+                if (bundle != null) {
+                    try {
+                        Object[] pdus = (Object[]) bundle.get("pdus");
+                        smsMessageList = new ArrayList<>();
+                        SmsMessage msg;
+                        for (int i = 0; i < pdus.length; i++) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                String format = bundle.getString("format");
+                                msg = SmsMessage.createFromPdu((byte[]) pdus[i], format);
+                                smsMessageList.add(msg);
+                                // TODO : MAKE A NOTIFICATION AND ABORT OTHER NOTIFICATIONS
+                                MessageNotificationBuilder.generateNotification(context, msg.getDisplayMessageBody());
+                                // TODO : SEND THE MESSAGE TO THE SERVER
+                            } else {
+                                msg = SmsMessage.createFromPdu((byte[]) pdus[i]);
+                                smsMessageList.add(msg);
+                                // TODO : MAKE A NOTIFICATION AND ABORT OTHER NOTIFICATIONS
+                                MessageNotificationBuilder.generateNotification(context, msg.getDisplayMessageBody());
+                                // TODO : SEND THE MESSAGE TO THE SERVER
+                            }
+                            String msg_from = msg.getOriginatingAddress();
+                            String msgBody = msg.getMessageBody();
+                        }
+                    } catch (Exception e) {
+                        Log.d("Exception caught", e.getMessage());
+                    }
+                }
                 messageAdapter.notifyDataSetChanged();
             }
         };
         IntentFilter filter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
-        this.registerReceiver(br, filter);
+        this.registerReceiver(messageReceiver, filter);
     }
 
     /**
@@ -105,8 +138,7 @@ public class HomeActivity extends AppCompatActivity {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED ||
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, permissions, PERMISSION_REQUEST_CODE);
-        }
-        else{
+        } else {
             // permissions are granted to the application
             // setUpDevice() and fetch the sms from device
             setUpDevice();
@@ -116,29 +148,27 @@ public class HomeActivity extends AppCompatActivity {
     /**
      * Fetch the device infomation and load the sms from ContextProvider or local database
      */
-    private void setUpDevice(){
+    private void setUpDevice() {
         // check shared preferences if device info is present or not
         SharedPreferences devicePreferences = getSharedPreferences(DevicePreferences, Context.MODE_PRIVATE);
         db = new DatabaseHelper(this);
 
-        if(devicePreferences.getAll().size() == 0){
+        if (devicePreferences.getAll().size() == 0) {
             deviceInfo = new DeviceInfo(this);
             Log.i("device info", deviceInfo.toString());
             // TODO : SEND DEVICE INFO TO SERVER
             // TODO : SAVE DEVICE INFO IN LOCALLY
-        }
-        else{
+        } else {
             Map<String, String> devicePrefencesMap = (Map<String, String>) devicePreferences.getAll();
             deviceInfo = new DeviceInfo(this, devicePrefencesMap);
         }
 
         SharedPreferences messagePreferences = getSharedPreferences(MessagePreferences, Context.MODE_PRIVATE);
         boolean isMessageDbSet = messagePreferences.getBoolean("DB_SET", false);
-        if(isMessageDbSet){
+        if (isMessageDbSet) {
             // fetch the messages from the local database
             smsList.addAll(db.getMessages());
-        }
-        else{
+        } else {
             // fetch the message from the device and put it to local database
             fetchSms = new SmsFetchFromDevice(this);
             smsList = fetchSms.getSMS();
@@ -147,7 +177,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
 
-    private void setUpRecyclerView(){
+    private void setUpRecyclerView() {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(messageAdapter);
@@ -174,9 +204,9 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     @WorkerThread
-    protected void callWorker(String sms){
-        handler.post(()->{
-            if(sms!=null) {
+    protected void callWorker(String sms) {
+        handler.post(() -> {
+            if (sms != null) {
                 String result = classifyText.classify(sms);
                 Log.i("output", result);
             }
@@ -187,10 +217,10 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        if(requestCode == PERMISSION_REQUEST_CODE){
+        if (requestCode == PERMISSION_REQUEST_CODE) {
             if (grantResults.length == 2 && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                 setUpDevice();
-            } else if(grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+            } else if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 setUpDevice();
             } else {
                 // Permission request was denied.
