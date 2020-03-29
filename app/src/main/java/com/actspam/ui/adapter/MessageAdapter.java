@@ -128,10 +128,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             holder.unreadCount.setVisibility(View.GONE);
         }
         else holder.unreadCount.setVisibility(View.VISIBLE);
-        if(message.getLabel().equals("SPAM")){
-            holder.spamSymbol.setVisibility(View.VISIBLE);
+        if(message.getLabel()!=null) {
+            if (message.getLabel().equals("SPAM")) {
+                holder.spamSymbol.setVisibility(View.VISIBLE);
+            }
+            else holder.spamSymbol.setVisibility(View.GONE);
         }
-        else holder.spamSymbol.setVisibility(View.GONE);
+
         holder.update(position);
     }
 
@@ -151,7 +154,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             view = v;
             dateView = v.findViewById(R.id.date_text);
             senderTextView = v.findViewById(R.id.sender_text);
-            senderNameView = v.findViewById(R.id.sender_name);
+            senderNameView = v.findViewById(R.id.sender_name_adapter);
             roundNameTextView = v.findViewById(R.id.round_name_icon);
             spamSymbol = v.findViewById(R.id.spam_symbol);
             unreadCount = v.findViewById(R.id.unread_count);

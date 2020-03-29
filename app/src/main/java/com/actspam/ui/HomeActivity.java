@@ -46,7 +46,7 @@ import java.util.Map;
 public class HomeActivity extends AppCompatActivity {
 
     private final int PERMISSION_REQUEST_CODE = 0;
-    final String[] permissions = new String[]{Manifest.permission.READ_PHONE_STATE, Manifest.permission.READ_SMS};
+    private static final String[] permissions = new String[]{Manifest.permission.READ_PHONE_STATE, Manifest.permission.READ_SMS};
 
     public static final String DevicePreferences = "DEVICE_INFO";
     public static final String MessagePreferences = "MESSAGES";
@@ -75,16 +75,14 @@ public class HomeActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.message_recycler_view);
         layoutManager = new LinearLayoutManager(this);
 
+        smsList = new ArrayList<>();
         classifyText = new ClassifyText(this);
         handler = new Handler();
-        checkPermissions();
 
         //        smsReceiver = new SmsReceiver();
 
         Log.i("SMS", "sms loaded");
-        messageAdapter = new MessageAdapter(getApplicationContext(), smsList, this);
-
-        setUpRecyclerView();
+        checkPermissions();
 
 //        for(final Message sms: smsList){
 //            String smsBody = sms.getSentBy() + " " + sms.getMessageBody();
@@ -168,16 +166,21 @@ public class HomeActivity extends AppCompatActivity {
         if (isMessageDbSet) {
             // fetch the messages from the local database
             smsList.addAll(db.getMessages());
+//            messageAdapter.notifyDataSetChanged();
         } else {
             // fetch the message from the device and put it to local database
             fetchSms = new SmsFetchFromDevice(this);
             smsList = fetchSms.getSMS();
+//            messageAdapter.notifyDataSetChanged();
+            Log.i("msg", "updating the view loaded messages from the device");
             db.insertMessages(smsList);
         }
+        setUpRecyclerView();
     }
 
 
     private void setUpRecyclerView() {
+        messageAdapter = new MessageAdapter(getApplicationContext(), smsList, this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(messageAdapter);
@@ -217,6 +220,12 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
+        for(String permission : permissions){
+            Log.i("msg", permission);
+        }
+        for(Integer i : grantResults){
+            Log.i("msg", String.valueOf(i));
+        }
         if (requestCode == PERMISSION_REQUEST_CODE) {
             if (grantResults.length == 2 && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                 setUpDevice();
@@ -224,6 +233,7 @@ public class HomeActivity extends AppCompatActivity {
                 setUpDevice();
             } else {
                 // Permission request was denied.
+
                 Snackbar.make(mLayout, R.string.phonestate_permission_denied,
                         Snackbar.LENGTH_INDEFINITE).setAction(R.string.give_permission, (View view) -> {
                     ActivityCompat.requestPermissions(this, permissions, PERMISSION_REQUEST_CODE);
@@ -231,7 +241,6 @@ public class HomeActivity extends AppCompatActivity {
             }
         }
     }
-
 
     @Override
     protected void onStop() {

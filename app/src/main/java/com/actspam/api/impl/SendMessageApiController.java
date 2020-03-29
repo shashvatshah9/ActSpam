@@ -1,5 +1,6 @@
 package com.actspam.api.impl;
 
+import com.actspam.BuildConfig;
 import com.actspam.api.MessageApi;
 import com.actspam.models.Message;
 import com.google.gson.Gson;
@@ -13,7 +14,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class SendMessageApiController implements Callback<Response> {
     // TODO : SET THE BASE URL
-    static final String BASE_URL = "";
+    static final String BASE_URL = BuildConfig.SERVER_URL;
     private Gson gson;
     private Retrofit retrofit;
     private MessageApi api;

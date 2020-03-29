@@ -16,7 +16,7 @@
         android:textSize="20dp" />
 
     <TextView
-        android:id="@+id/sender_name"
+        android:id="@+id/sender_name_adapter"
         android:layout_width="match_parent"
         android:layout_height="25dp"
         android:layout_marginLeft="65dp"
@@ -24,7 +24,6 @@
         android:layout_marginRight="120dp"
         android:width="1sp"
         android:fontFamily="@font/amaranth"
-        android:text="Hello"
         android:textColor="@color/title"
         android:textSize="18sp"
         android:textStyle="bold" />
@@ -36,7 +35,7 @@
         android:layout_marginLeft="-110dp"
         android:layout_marginTop="15dp"
         android:layout_marginRight="10dp"
-        android:layout_toRightOf="@+id/sender_name"
+        android:layout_toRightOf="@+id/sender_name_adapter"
         android:text="01-01-0101 10:19"
         android:textSize="12sp" />
 
