@@ -21,7 +21,7 @@
         android:layout_height="25dp"
         android:layout_marginLeft="65dp"
         android:layout_marginTop="15dp"
-        android:layout_marginRight="120dp"
+        android:layout_marginRight="140dp"
         android:width="1sp"
         android:fontFamily="@font/amaranth"
         android:textColor="@color/title"
@@ -30,9 +30,9 @@
 
     <TextView
         android:id="@+id/date_text"
-        android:layout_width="110dp"
+        android:layout_width="130dp"
         android:layout_height="20sp"
-        android:layout_marginLeft="-110dp"
+        android:layout_marginLeft="-130dp"
         android:layout_marginTop="15dp"
         android:layout_marginRight="10dp"
         android:layout_toRightOf="@+id/sender_name_adapter"

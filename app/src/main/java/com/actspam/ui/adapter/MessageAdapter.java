@@ -40,8 +40,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     private ArrayList<Integer> selectedMessages;
     private DeviceMessage recentlyDeletedMessage;
     private int recentlyDeletedMessagePosition = -1;
-    private ClassifyText classifyText;
-    private Handler handler;
+//    private ClassifyText classifyText;
+//    private Handler handler;
 
     private ActionMode.Callback actionModeCallback = new ActionMode.Callback() {
         @Override
@@ -85,7 +85,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         this.messageList = messageList;
         this.selectedMessages = new ArrayList<>();
         recentlyDeletedMessage = new DeviceMessage();
-        this.classifyText = classifyText;
+//        this.classifyText = classifyText;
         this.format = new SimpleDateFormat(datePattern);
     }
 
@@ -136,9 +136,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             }
             else holder.spamSymbol.setVisibility(View.GONE);
         }
-        else{
+//        else{
 //            AsyncTask.execute(()-> handler.post(()->callWorker(message.getMessageBody().trim(), holder)));
-        }
+//        }
         holder.update(position);
     }
 
@@ -182,15 +182,15 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             } else {
                 view.setBackgroundColor(Color.WHITE);
             }
-//            view.setOnLongClickListener((View view1)->{
+            view.setOnLongClickListener((View view1)->{
 //                ((AppCompatActivity)view1.getContext()).startSupportActionMode(actionModeCallback);
 //                selectItem(position);
-//                new MessagePreviewer().show(view1.getContext(), view, senderTextView.getText().toString());
-//
-//                return true;
-//            });
+                new MessagePreviewer().show(view1.getContext(), view, senderTextView.getText().toString());
+
+                return true;
+            });
             view.setOnClickListener((View view1)->{
-                selectItem(position);
+//                selectItem(position);
 
 //                if(multiSelect) {
 //                }
@@ -200,7 +200,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 //                Intent openActivity = new Intent(context, MessageViewActivity.class);
 //                openActivity.putExtra("key", value); //Optional parameters
 //                mainActivity.startActivity(openActivity);
-                new MessagePreviewer().show(view1.getContext(), view, senderTextView.getText().toString());
+//                new MessagePreviewer().show(view1.getContext(), view, senderTextView.getText().toString());
             });
         }
 
