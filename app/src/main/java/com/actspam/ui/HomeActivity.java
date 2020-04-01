@@ -68,6 +68,9 @@ public class HomeActivity extends AppCompatActivity {
     private MessageAdapter messageAdapter;
     private RecyclerView.LayoutManager layoutManager;
 
+    private boolean isLoading = false;
+    private final static int smsLoadSize = 20;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -168,7 +171,16 @@ public class HomeActivity extends AppCompatActivity {
         boolean isMessageDbSet = messagePreferences.getBoolean("DB_SET", false);
         if (isMessageDbSet) {
             // fetch the messages from the local database
-            smsList.addAll(db.getMessages());
+            List<DeviceMessage> deviceMessageList = db.getMessages();
+            if(deviceMessageList!=null) {
+                smsList.addAll(deviceMessageList);
+            }
+            else{
+                // if there are no messages in the database .. ie db has been deleted by clearing the storage. then load it again
+                SharedPreferences.Editor messagePrefEditor = getSharedPreferences(MessagePreferences, Context.MODE_PRIVATE).edit();
+                messagePrefEditor.putBoolean("DB_SET", false);
+                setUpDevice();
+            }
 //            messageAdapter.notifyDataSetChanged();
         } else {
             // fetch the message from the device and put it to local database
@@ -177,6 +189,8 @@ public class HomeActivity extends AppCompatActivity {
 //            messageAdapter.notifyDataSetChanged();
             Log.i("msg", "updating the view loaded messages from the device");
             db.insertMessages(smsList);
+            SharedPreferences.Editor messagePrefEditor = getSharedPreferences(MessagePreferences, Context.MODE_PRIVATE).edit();
+            messagePrefEditor.putBoolean("DB_SET", true);
         }
         classifyRemainingSms();
         setUpRecyclerView();
@@ -207,6 +221,49 @@ public class HomeActivity extends AppCompatActivity {
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
         }
+    }
+
+    private void initScrollListener() {
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+
+                if (!isLoading) {
+                    if (linearLayoutManager != null && linearLayoutManager.findLastCompletelyVisibleItemPosition() == smsList.size() - 1) {
+                        //bottom of list!
+                        loadMore();
+                        isLoading = true;
+                    }
+                }
+            }
+        });
+    }
+
+    private void loadMore() {
+//        smsList.add(null);
+//        messageAdapter.notifyItemInserted(smsList.size() - 1);
+
+        new Handler().postDelayed(()-> {
+//                smsList.remove(smsList.size() - 1);
+                int scrollPosition = smsList.size();
+//                messageAdapter.notifyItemRemoved(scrollPosition);
+                int currentSize = scrollPosition;
+                int nextLimit = currentSize + smsLoadSize;
+
+                while (currentSize - 1 < nextLimit) {
+//                    smsList.add("Item " + currentSize);
+                    // TODO: FETCH SMS FROM DATABASE
+                }
+                messageAdapter.notifyDataSetChanged();
+                isLoading = false;
+        }, 2000);
     }
 
     private void classifyRemainingSms(){

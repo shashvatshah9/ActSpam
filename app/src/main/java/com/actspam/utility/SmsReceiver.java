@@ -1,6 +1,5 @@
 package com.actspam.utility;
 
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -10,18 +9,7 @@ import android.telephony.SmsMessage;
 import android.util.Log;
 import android.widget.Toast;
 
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
-
-import com.actspam.R;
-import com.actspam.models.DeviceMessage;
-import com.actspam.models.Message;
-import com.actspam.ui.HomeActivity;
 import com.actspam.ui.notification.MessageNotificationBuilder;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 
 public class SmsReceiver extends BroadcastReceiver {
