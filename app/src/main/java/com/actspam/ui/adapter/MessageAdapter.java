@@ -1,10 +1,10 @@
 package com.actspam.ui.adapter;
 
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -15,18 +15,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.actspam.R;
+import com.actspam.classifier.ClassifyText;
 import com.actspam.models.DeviceMessage;
 import com.actspam.models.Message;
 import com.actspam.ui.HomeActivity;
 import com.actspam.ui.MessagePreviewer;
-import com.actspam.ui.MessageViewActivity;
 
-import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,11 +35,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     private HomeActivity mainActivity;
     private List<DeviceMessage> messageList;
     private static final String datePattern = "dd-MM-yyyy hh:mm";
-    private DateFormat format;
+    private SimpleDateFormat format;
     private boolean multiSelect = false;
     private ArrayList<Integer> selectedMessages;
     private DeviceMessage recentlyDeletedMessage;
     private int recentlyDeletedMessagePosition = -1;
+    private ClassifyText classifyText;
+    private Handler handler;
 
     private ActionMode.Callback actionModeCallback = new ActionMode.Callback() {
         @Override
@@ -78,13 +79,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         }
     };
 
-    public MessageAdapter(Context context, List<DeviceMessage> messageList, HomeActivity mainActivity) {
+    public MessageAdapter(Context context, List<DeviceMessage> messageList, HomeActivity mainActivity, ClassifyText classifyText) {
         this.context = context;
         this.mainActivity = mainActivity;
         this.messageList = messageList;
         this.selectedMessages = new ArrayList<>();
         recentlyDeletedMessage = new DeviceMessage();
-        this.format = DateFormat.getDateInstance(DateFormat.SHORT);
+        this.classifyText = classifyText;
+        this.format = new SimpleDateFormat(datePattern);
     }
 
     // only for swipe action
@@ -134,7 +136,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             }
             else holder.spamSymbol.setVisibility(View.GONE);
         }
-
+        else{
+//            AsyncTask.execute(()-> handler.post(()->callWorker(message.getMessageBody().trim(), holder)));
+        }
         holder.update(position);
     }
 
@@ -178,13 +182,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             } else {
                 view.setBackgroundColor(Color.WHITE);
             }
-            view.setOnLongClickListener((View view1)->{
+//            view.setOnLongClickListener((View view1)->{
 //                ((AppCompatActivity)view1.getContext()).startSupportActionMode(actionModeCallback);
 //                selectItem(position);
-                new MessagePreviewer().show(view1.getContext(), view, senderTextView.getText().toString());
-
-                return true;
-            });
+//                new MessagePreviewer().show(view1.getContext(), view, senderTextView.getText().toString());
+//
+//                return true;
+//            });
             view.setOnClickListener((View view1)->{
                 selectItem(position);
 

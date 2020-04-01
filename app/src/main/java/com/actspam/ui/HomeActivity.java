@@ -18,11 +18,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.telephony.SmsMessage;
 import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 import android.widget.TextView;
 
@@ -58,6 +60,7 @@ public class HomeActivity extends AppCompatActivity {
     private SmsReceiver smsReceiver;
     private List<DeviceMessage> smsList;
     private DatabaseHelper db;
+    private List<Pair<Long, Integer>> updatedLabelMessages;
 
     private TextView textView;
     private View mLayout;
@@ -175,12 +178,12 @@ public class HomeActivity extends AppCompatActivity {
             Log.i("msg", "updating the view loaded messages from the device");
             db.insertMessages(smsList);
         }
+        classifyRemainingSms();
         setUpRecyclerView();
     }
 
-
     private void setUpRecyclerView() {
-        messageAdapter = new MessageAdapter(getApplicationContext(), smsList, this);
+        messageAdapter = new MessageAdapter(getApplicationContext(), smsList, this, classifyText);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(messageAdapter);
@@ -206,11 +209,25 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+    private void classifyRemainingSms(){
+        updatedLabelMessages = new ArrayList<>();
+        for(DeviceMessage dm: smsList){
+            if(dm.getMessage().getLabel() == null){
+                AsyncTask.execute(()-> handler.post(()->callWorker(dm)));
+            }
+        }
+    }
+
     @WorkerThread
-    protected void callWorker(String sms) {
+    protected void callWorker(DeviceMessage dm) {
+        String messageBody = dm.getMessage().getMessageBody();
         handler.post(() -> {
-            if (sms != null) {
-                String result = classifyText.classify(sms);
+            if (messageBody != null) {
+                String result = classifyText.classify(messageBody);
+                if(result.equals("1")){
+                    updatedLabelMessages.add(new Pair<>(dm.getId(), 1));
+                }
+                else updatedLabelMessages.add(new Pair<>(dm.getId(), 0));
                 Log.i("output", result);
             }
         });
