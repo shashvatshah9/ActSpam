@@ -1,17 +1,6 @@
 package com.actspam.ui;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.WorkerThread;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.recyclerview.widget.DefaultItemAnimator;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.Manifest;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -27,6 +16,16 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.WorkerThread;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.actspam.R;
 import com.actspam.classifier.ClassifyText;
@@ -35,7 +34,6 @@ import com.actspam.models.DeviceMessage;
 import com.actspam.ui.adapter.MessageAdapter;
 import com.actspam.ui.adapter.SwipeToDeleteCallback;
 import com.actspam.ui.notification.MessageNotificationBuilder;
-import com.actspam.utility.AppConstants;
 import com.actspam.utility.DatabaseHelper;
 import com.actspam.utility.SmsFetchFromDevice;
 import com.actspam.utility.SmsReceiver;
@@ -75,7 +73,6 @@ public class HomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        createNotificationChannel();
         Log.i("Demo", "OnCreate");
         mLayout = findViewById(R.id.main_activity_relative_layout);
         recyclerView = findViewById(R.id.message_recycler_view);
@@ -84,8 +81,6 @@ public class HomeActivity extends AppCompatActivity {
         smsList = new ArrayList<>();
         classifyText = new ClassifyText(this);
         handler = new Handler();
-
-        //        smsReceiver = new SmsReceiver();
 
         Log.i("SMS", "sms loaded");
         checkPermissions();
@@ -99,7 +94,6 @@ public class HomeActivity extends AppCompatActivity {
             public void onReceive(Context context, Intent intent) {
                 Bundle bundle = intent.getExtras();
                 List<SmsMessage> smsMessageList;
-
                 if (bundle != null) {
                     try {
                         Object[] pdus = (Object[]) bundle.get("pdus");
@@ -111,23 +105,21 @@ public class HomeActivity extends AppCompatActivity {
                                 msg = SmsMessage.createFromPdu((byte[]) pdus[i], format);
                                 smsMessageList.add(msg);
                                 // TODO : MAKE A NOTIFICATION AND ABORT OTHER NOTIFICATIONS
-                                MessageNotificationBuilder.generateNotification(context, msg.getDisplayMessageBody());
                                 // TODO : SEND THE MESSAGE TO THE SERVER
                             } else {
                                 msg = SmsMessage.createFromPdu((byte[]) pdus[i]);
                                 smsMessageList.add(msg);
                                 // TODO : MAKE A NOTIFICATION AND ABORT OTHER NOTIFICATIONS
-                                MessageNotificationBuilder.generateNotification(context, msg.getDisplayMessageBody());
                                 // TODO : SEND THE MESSAGE TO THE SERVER
                             }
-                            String msg_from = msg.getOriginatingAddress();
-                            String msgBody = msg.getMessageBody();
+                            Toast.makeText(getApplicationContext(), msg.getDisplayMessageBody(), Toast.LENGTH_SHORT).show();
+                            MessageNotificationBuilder.generateNotification(context, msg.getDisplayMessageBody());
                         }
+                        messageAdapter.notifyDataSetChanged();
                     } catch (Exception e) {
                         Log.d("Exception caught", e.getMessage());
                     }
                 }
-                messageAdapter.notifyDataSetChanged();
             }
         };
         IntentFilter filter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
@@ -192,35 +184,18 @@ public class HomeActivity extends AppCompatActivity {
             SharedPreferences.Editor messagePrefEditor = getSharedPreferences(MessagePreferences, Context.MODE_PRIVATE).edit();
             messagePrefEditor.putBoolean("DB_SET", true);
         }
-        classifyRemainingSms();
+//        classifyRemainingSms();
         setUpRecyclerView();
     }
 
     private void setUpRecyclerView() {
-        messageAdapter = new MessageAdapter(getApplicationContext(), smsList, this, classifyText);
+        messageAdapter = new MessageAdapter(getApplicationContext(), smsList, this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(messageAdapter);
         ItemTouchHelper itemTouchHelper = new
                 ItemTouchHelper(new SwipeToDeleteCallback(getApplicationContext(), messageAdapter));
         itemTouchHelper.attachToRecyclerView(recyclerView);
-    }
-
-    private void createNotificationChannel() {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = getString(R.string.channel_name);
-            String description = getString(R.string.channel_description);
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel(AppConstants.NOTIFICATION_CHANNEL_ID, name, importance);
-            channel.setDescription(description);
-            channel.setImportance(NotificationManager.IMPORTANCE_HIGH);
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
     }
 
     private void initScrollListener() {

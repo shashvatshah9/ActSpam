@@ -12,7 +12,7 @@ import android.widget.Toast;
 import com.actspam.ui.notification.MessageNotificationBuilder;
 
 
-public class SmsReceiver extends BroadcastReceiver {
+public class  SmsReceiver extends BroadcastReceiver {
 
     @SuppressWarnings(value = "deprecation")
     @Override

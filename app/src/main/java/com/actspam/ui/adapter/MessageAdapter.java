@@ -40,8 +40,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     private ArrayList<Integer> selectedMessages;
     private DeviceMessage recentlyDeletedMessage;
     private int recentlyDeletedMessagePosition = -1;
-//    private ClassifyText classifyText;
-//    private Handler handler;
 
     private ActionMode.Callback actionModeCallback = new ActionMode.Callback() {
         @Override
@@ -79,13 +77,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         }
     };
 
-    public MessageAdapter(Context context, List<DeviceMessage> messageList, HomeActivity mainActivity, ClassifyText classifyText) {
+    public MessageAdapter(Context context, List<DeviceMessage> messageList, HomeActivity mainActivity) {
         this.context = context;
         this.mainActivity = mainActivity;
         this.messageList = messageList;
         this.selectedMessages = new ArrayList<>();
         recentlyDeletedMessage = new DeviceMessage();
-//        this.classifyText = classifyText;
         this.format = new SimpleDateFormat(datePattern);
     }
 
@@ -136,9 +133,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             }
             else holder.spamSymbol.setVisibility(View.GONE);
         }
-//        else{
-//            AsyncTask.execute(()-> handler.post(()->callWorker(message.getMessageBody().trim(), holder)));
-//        }
         holder.update(position);
     }
 
