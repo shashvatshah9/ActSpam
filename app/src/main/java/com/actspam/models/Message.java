@@ -2,6 +2,7 @@ package com.actspam.models;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.text.DateFormat;
 import java.util.Date;
 
 public class Message {

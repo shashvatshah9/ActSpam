@@ -11,6 +11,9 @@ import android.text.TextUtils;
 import com.actspam.models.DeviceMessage;
 import com.actspam.models.Message;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -18,11 +21,10 @@ import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
-
+    private static final String datePattern = "dd-MM-yyyy hh:mm";
     // Database Name
     private static final String DATABASE_NAME = "actspam";
-    private static final String GET_MESSAGES_QUERY = "SELECT  * FROM " + AppConstants.MessageTableName + " ORDER BY " +
-            AppConstants.DatetimeCol + " DESC";
+    private static final String GET_MESSAGES_QUERY = "SELECT  * FROM " + AppConstants.MessageTableName;
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -80,9 +82,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             ContentValues values;
             for (DeviceMessage deviceMessage : deviceMessages[0]) {
                 values = new ContentValues();
-                values.put(AppConstants.IdCol, deviceMessage.getId());
+                values.put(AppConstants.MessageIdCol, deviceMessage.getId());
                 values.put(AppConstants.ThreadIdCol, deviceMessage.getThreadId());
-                values.put(AppConstants.DatetimeCol, deviceMessage.getMessage().getDate().toString());
+                Date date = deviceMessage.getMessage().getDate();
+                DateFormat df = new SimpleDateFormat(datePattern);
+                String dateString = df.format(date);
+                values.put(AppConstants.DatetimeCol, dateString);
                 String hasRead = "";
                 if (deviceMessage.isHasRead()) {
                     hasRead = "TRUE";
@@ -112,13 +117,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 do {
                     DeviceMessage deviceMessage = new DeviceMessage();
                     Message message = new Message();
-                    deviceMessage.setId(cursors[0].getLong(cursors[0].getColumnIndex(AppConstants.IdCol)));
+                    deviceMessage.setId(cursors[0].getLong(cursors[0].getColumnIndex(AppConstants.MessageIdCol)));
                     deviceMessage.setThreadId(cursors[0].getLong(cursors[0].getColumnIndex(AppConstants.ThreadIdCol)));
                     String hasReadString = cursors[0].getString(cursors[0].getColumnIndex(AppConstants.HasReadCol));
                     boolean hasRead = hasReadString.equals("TRUE") ? true: false;
                     deviceMessage.setHasRead(hasRead);
-                    Date date = new Date(cursors[0].getLong(cursors[0].getColumnIndex("date")));
-                    message.setDate(date);
+
+                    DateFormat df = new SimpleDateFormat(datePattern);
+                    Date date = null;
+                    try {
+                        date = df.parse(cursors[0].getString(cursors[0].getColumnIndex("date")));
+                        message.setDate(date);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
                     message.setMessageBody(cursors[0].getString(cursors[0].getColumnIndex(AppConstants.MessageBodyCol)));
                     message.setLabel(cursors[0].getString(cursors[0].getColumnIndex(AppConstants.LabelCol)));
                     message.setSentBy(cursors[0].getString(cursors[0].getColumnIndex(AppConstants.SentByCol)));

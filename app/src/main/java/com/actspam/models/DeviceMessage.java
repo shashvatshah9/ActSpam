@@ -18,7 +18,8 @@ public class DeviceMessage {
 
     public static final String CREATE_TABLE =
             "CREATE TABLE " + AppConstants.MessageTableName + "("
-                    + AppConstants.IdCol + " INTEGER,"
+                    + AppConstants.IdCol + " INTEGER PRIMARY KEY,"
+                    + AppConstants.MessageIdCol + " INTEGER,"
                     + AppConstants.ThreadIdCol + " INTEGER,"
                     + AppConstants.DatetimeCol + " TEXT,"
                     + AppConstants.HasReadCol + " INTEGER,"

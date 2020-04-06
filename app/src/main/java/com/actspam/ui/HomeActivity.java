@@ -113,7 +113,7 @@ public class HomeActivity extends AppCompatActivity {
                                 // TODO : SEND THE MESSAGE TO THE SERVER
                             }
                             Toast.makeText(getApplicationContext(), msg.getDisplayMessageBody(), Toast.LENGTH_SHORT).show();
-                            MessageNotificationBuilder.generateNotification(context, msg.getDisplayMessageBody());
+//                            MessageNotificationBuilder.generateNotification(context, msg.getDisplayMessageBody());
                         }
                         messageAdapter.notifyDataSetChanged();
                     } catch (Exception e) {
@@ -161,7 +161,10 @@ public class HomeActivity extends AppCompatActivity {
 
         SharedPreferences messagePreferences = getSharedPreferences(MessagePreferences, Context.MODE_PRIVATE);
         boolean isMessageDbSet = messagePreferences.getBoolean("DB_SET", false);
+        Log.i("pref", String.valueOf(isMessageDbSet) + " bool value");
+
         if (isMessageDbSet) {
+            Log.i("DB", "Getting messages from local db");
             // fetch the messages from the local database
             List<DeviceMessage> deviceMessageList = db.getMessages();
             if(deviceMessageList!=null) {
@@ -170,20 +173,22 @@ public class HomeActivity extends AppCompatActivity {
             else{
                 // if there are no messages in the database .. ie db has been deleted by clearing the storage. then load it again
                 SharedPreferences.Editor messagePrefEditor = getSharedPreferences(MessagePreferences, Context.MODE_PRIVATE).edit();
-                messagePrefEditor.putBoolean("DB_SET", false);
+                messagePrefEditor.putBoolean("DB_SET", false).apply();
                 setUpDevice();
             }
 //            messageAdapter.notifyDataSetChanged();
         } else {
             // fetch the message from the device and put it to local database
+            Log.i("DB", "Getting messages from content provider");
             fetchSms = new SmsFetchFromDevice(this);
             smsList = fetchSms.getSMS();
 //            messageAdapter.notifyDataSetChanged();
             Log.i("msg", "updating the view loaded messages from the device");
             db.insertMessages(smsList);
             SharedPreferences.Editor messagePrefEditor = getSharedPreferences(MessagePreferences, Context.MODE_PRIVATE).edit();
-            messagePrefEditor.putBoolean("DB_SET", true);
+            messagePrefEditor.putBoolean("DB_SET", true).apply();
         }
+        Log.i("pref", "Updating the shared preferences " + getSharedPreferences(MessagePreferences, Context.MODE_PRIVATE).getBoolean("DB_SET", false));
 //        classifyRemainingSms();
         setUpRecyclerView();
     }
