@@ -89,41 +89,41 @@ public class HomeActivity extends AppCompatActivity {
 //            String smsBody = sms.getSentBy() + " " + sms.getMessageBody();
 //            AsyncTask.execute(()-> handler.post(()->callWorker(smsBody)));
 //        }
-        BroadcastReceiver messageReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                Bundle bundle = intent.getExtras();
-                List<SmsMessage> smsMessageList;
-                if (bundle != null) {
-                    try {
-                        Object[] pdus = (Object[]) bundle.get("pdus");
-                        smsMessageList = new ArrayList<>();
-                        SmsMessage msg;
-                        for (int i = 0; i < pdus.length; i++) {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                String format = bundle.getString("format");
-                                msg = SmsMessage.createFromPdu((byte[]) pdus[i], format);
-                                smsMessageList.add(msg);
-                                // TODO : MAKE A NOTIFICATION AND ABORT OTHER NOTIFICATIONS
-                                // TODO : SEND THE MESSAGE TO THE SERVER
-                            } else {
-                                msg = SmsMessage.createFromPdu((byte[]) pdus[i]);
-                                smsMessageList.add(msg);
-                                // TODO : MAKE A NOTIFICATION AND ABORT OTHER NOTIFICATIONS
-                                // TODO : SEND THE MESSAGE TO THE SERVER
-                            }
-                            Toast.makeText(getApplicationContext(), msg.getDisplayMessageBody(), Toast.LENGTH_SHORT).show();
-//                            MessageNotificationBuilder.generateNotification(context, msg.getDisplayMessageBody());
-                        }
-                        messageAdapter.notifyDataSetChanged();
-                    } catch (Exception e) {
-                        Log.d("Exception caught", e.getMessage());
-                    }
-                }
-            }
-        };
-        IntentFilter filter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
-        this.registerReceiver(messageReceiver, filter);
+//        BroadcastReceiver messageReceiver = new BroadcastReceiver() {
+//            @Override
+//            public void onReceive(Context context, Intent intent) {
+//                Bundle bundle = intent.getExtras();
+//                List<SmsMessage> smsMessageList;
+//                if (bundle != null) {
+//                    try {
+//                        Object[] pdus = (Object[]) bundle.get("pdus");
+//                        smsMessageList = new ArrayList<>();
+//                        SmsMessage msg;
+//                        for (int i = 0; i < pdus.length; i++) {
+//                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                                String format = bundle.getString("format");
+//                                msg = SmsMessage.createFromPdu((byte[]) pdus[i], format);
+//                                smsMessageList.add(msg);
+//                                // TODO : MAKE A NOTIFICATION AND ABORT OTHER NOTIFICATIONS
+//                                // TODO : SEND THE MESSAGE TO THE SERVER
+//                            } else {
+//                                msg = SmsMessage.createFromPdu((byte[]) pdus[i]);
+//                                smsMessageList.add(msg);
+//                                // TODO : MAKE A NOTIFICATION AND ABORT OTHER NOTIFICATIONS
+//                                // TODO : SEND THE MESSAGE TO THE SERVER
+//                            }
+//                            Toast.makeText(getApplicationContext(), msg.getDisplayMessageBody(), Toast.LENGTH_SHORT).show();
+////                            MessageNotificationBuilder.generateNotification(context, msg.getDisplayMessageBody());
+//                        }
+//                        messageAdapter.notifyDataSetChanged();
+//                    } catch (Exception e) {
+//                        Log.d("Exception caught", e.getMessage());
+//                    }
+//                }
+//            }
+//        };
+//        IntentFilter filter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
+//        this.registerReceiver(messageReceiver, filter);
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.actspam.ui.adapter;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -105,6 +106,20 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         }catch (Exception e){
             e.printStackTrace();
         }
+
+        // TODO : UPDATE THE SQLITE DATABASE
+    }
+
+    public void markAsRead(int position){
+        DeviceMessage dm = messageList.get(position);
+        Long _id = dm.getId();
+//        ContentValues values = new ContentValues();
+//        values.put("read", true);
+//        int rowsChanged = context.getContentResolver().update(Uri.parse("content://sms/inbox"),values, "_id="+ _id, null);
+//        if(rowsChanged>0){
+            messageList.get(position).setHasRead(true);
+            notifyItemChanged(position);
+//        }
     }
 
     @NonNull
@@ -130,6 +145,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         if(message.getLabel()!=null) {
             if (message.getLabel().equals("SPAM")) {
                 holder.spamSymbol.setVisibility(View.VISIBLE);
+                holder.roundNameTextView.setBackgroundColor(Color.RED);
             }
             else holder.spamSymbol.setVisibility(View.GONE);
         }
@@ -179,8 +195,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             view.setOnLongClickListener((View view1)->{
 //                ((AppCompatActivity)view1.getContext()).startSupportActionMode(actionModeCallback);
 //                selectItem(position);
-                new MessagePreviewer().show(view1.getContext(), view, senderTextView.getText().toString());
-
+                new MessagePreviewer().show(view1.getContext(), view, senderTextView.getText().toString(), MessageAdapter.this, position);
+                // mark as read after previewed
+//                markAsRead(position);
                 return true;
             });
             view.setOnClickListener((View view1)->{
@@ -189,7 +206,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 //                if(multiSelect) {
 //                }
 //                else{
-//                     TODO : OPEN THE THREAD VIEW ACTIVITY
 //                }
 //                Intent openActivity = new Intent(context, MessageViewActivity.class);
 //                openActivity.putExtra("key", value); //Optional parameters

@@ -14,9 +14,10 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.actspam.R;
+import com.actspam.ui.adapter.MessageAdapter;
 
 public class MessagePreviewer{
-    public void show(Context context, View source, String text) {
+    public void show(Context context, View source, String text, MessageAdapter messageAdapter, int position) {
         BitmapDrawable background = getBlurredScreenDrawable(context, source.getRootView());
         View dialogView = LayoutInflater.from(context).inflate(R.layout.message_preview, null);
         TextView textView = dialogView.findViewById(R.id.message_thread_bubble);
@@ -35,11 +36,13 @@ public class MessagePreviewer{
                     if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
                         v.getParent().requestDisallowInterceptTouchEvent(false);
                         dialog.dismiss();
+                        messageAdapter.markAsRead(position);
                         return true;
                     }
                 }
                 return false;
             }
+
         });
     }
 
